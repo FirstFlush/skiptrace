@@ -1,0 +1,92 @@
+
+
+skip
+=====================
+first name - char
+last name - char
+age - int
+
+@full name
+@check duplicate address/phone/relative
+
+
+address
+====================
+skip - fk
+current address - bool
+street address - char
+city - char
+state - char (choices)
+zip code - char
+
+@prettify address
+
+
+phone
+====================
+number - char
+skip - fk
+
+@unified format
+
+
+relative
+====================
+first name - char
+last name - char
+skip - mtm
+alive - bool
+potential MMN - bool
+phone - char null=True
+
+@filter by last name
+
+
+company
+===================
+name - char
+skip - fk? mtm?
+skip is owner - bool
+phone - char null=True
+website - url null=True
+
+
+bank
+====================
+name - char
+difficulty - char (choices)
+
+
+
+bank account
+====================
+account num - char
+bank - fk
+skip - mtm
+dfd/dla - date object
+
+
+
+credit card
+====================
+number - int or char
+skip - fk
+limit - int null=True
+expiry - char null=True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
