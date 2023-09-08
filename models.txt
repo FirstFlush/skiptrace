@@ -22,7 +22,7 @@ zip code - char
 @prettify address
 
 
-phone
+phone (skip's phone)
 ====================
 number - char
 last_known - bool
@@ -52,28 +52,39 @@ phone - char null=True
 website - url null=True
 
 
-bank
-====================
-name - char
-difficulty - char (choices)
-
-
-
-urls
+website
 ====================
 company name - char
 type - char (choices*)
 url - url
-is error - bool default=False
+error_count - int default=0
 
-@encountered error, change is_error to True
+@encountered error, error_count +=1
+@too many errors
+    -scraper will not run because it has failed too many times
+    -"too many" will be pre-defined number in config.py
 
 *url types will include:
     -urls we must submit info to
     -base urls for scraping
 
 
+bank
+====================
+name - char
+difficulty - char (choices)
 
+
+bank phone
+====================
+bank - fk
+phone - char max_length=255
+error_count - int default=0
+
+@encountered error
+    -increase error_count += 1
+@too many errors
+    -similar functionality to website method
 
 bank account
 ====================

@@ -6,8 +6,8 @@ import ua_generator
 
 from enum import Enum
 from bs4 import BeautifulSoup, FeatureNotFound, ParserRejectedMarkup
-from playwright.sync_api import sync_playwright
-from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import sync_playwright, Response as ResponsePlaywright
+from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
 import config
 
@@ -23,6 +23,12 @@ class LogLevel(Enum):
     WARNING = "warning"
     INFO = "info"
     DEBUG = "debug"
+
+
+# class WebDriver(Enum):
+#     FIREFOX = "firefox"
+#     CHROMIUM = "chromium"
+#     WEBKIT = "webkit"
 
 
 class WebScrapingError(BaseException):
@@ -94,7 +100,6 @@ class Spider:
             self._check_soup()
         except CheckSoupError as e:
             self.log(CheckSoupError(repr(e)), LogLevel.ERROR)
-
         return
 
     def log(self, e:WebScrapingError, level:LogLevel=LogLevel.ERROR):
@@ -114,7 +119,7 @@ class Spider:
                 logger.critical(f"Unexpected log level: {level}. Original error: {repr(e)}")
         return
 
-    def random_delay(self, l:int=3, h:int=8):
+    def random_delay(self, l:int=2, h:int=8):
         """Random time delay. 
         To make us look more human :)
         """
@@ -145,15 +150,15 @@ class RequestsSpider(Spider):
 
 
     def get(self, session:requests.Session, **kwargs) -> requests.Response | None:
-        """Wrapper function for requests library session.get() to
-        include error handling.
+        """Wrapper function for requests library's session.get() with
+        included error handling.
 
         *If the request fails this method will return None. Always check 
         to make sure the return value is a Response object and not None.
         """
         res = None
         try:
-            res = session.get(self.url, timeout=2, **kwargs)
+            res = session.get(self.url, timeout=5, **kwargs)
         except (requests.RequestException, requests.Timeout) as e:
             self.log(SpiderHttpError(repr(e)), LogLevel.ERROR)
 
@@ -173,6 +178,10 @@ class RequestsSpider(Spider):
 
 class PlaywrightSpider(Spider):
     """This class adds playwright functionality to our spider class."""
+    
+    def __init__(self):
+        self.page = None
+
 
     def sync(self, browser:str='chromium', headless:bool=False):
         """Sync Chromium webdriver and open the browser."""
@@ -187,6 +196,19 @@ class PlaywrightSpider(Spider):
         self.page = self.browser.new_page()
         return
 
+    def goto(self, url, timeout:float=5000, **kwargs) -> ResponsePlaywright|None:
+        """Wrapper function for playwright's page.goto() method to
+        includes error handling and logging.
+
+        *timeout is in milliseconds.
+        *Ensure this method returns a ResponsePlaywright object, and not None!
+        """
+        res = None
+        try:
+            res = self.page.goto(url, timeout=timeout, **kwargs)
+        except (PlaywrightError, PlaywrightTimeoutError) as e:
+            self.log(SpiderHttpError(repr(e)), LogLevel.ERROR)
+        return res
 
     def shutdown(self):
         """Shuts down the web browser"""

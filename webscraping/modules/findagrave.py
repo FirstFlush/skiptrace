@@ -20,11 +20,6 @@ class FindAGrave(RequestsSpider):
         print(bleh)
 
 
-
-
-
-
-
 class FindAPlaywrightGrave(PlaywrightSpider):
 
     url = "https://www.findagrave.com"
@@ -32,7 +27,10 @@ class FindAPlaywrightGrave(PlaywrightSpider):
     def __init__(self):
         super().__init__()
         self.sync('chromium', headless=False)
-        res_pw = self.page.goto(self.url)
+        res = self.goto(self.url)
+        if res is None:
+            return
+        
         self.cook_soup(markup=self.page.content())
         print(self.soup.prettify())
         # soup = BeautifulSoup(markup=self.page.content(), features='lxml')
@@ -41,5 +39,5 @@ class FindAPlaywrightGrave(PlaywrightSpider):
 
         self.shutdown()
 
-FindAGrave()
-# FindAPlaywrightGrave()
+# FindAGrave()
+FindAPlaywrightGrave()
