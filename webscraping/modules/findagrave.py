@@ -1,16 +1,18 @@
-# from ..base_scrapers import PageGrabber, RequestsMixin, PlaywrightMixin
+# from ..spider import RequestsSpider, PlaywrightSpider
 
-from webscraping.spider import Spider, RequestsMixin, PlaywrightMixin
+from webscraping.spider import RequestsSpider, PlaywrightSpider
 
 
-class FindAGrave(Spider, RequestsMixin):
+class FindAGrave(RequestsSpider):
 
     url = "https://www.findagrave.com"
 
     def __init__(self):
         super().__init__()
-        s = self.session()
-        res = s.get(self.url)
+        res = self.get(self.session())
+        if res is None:
+            return
+        
         self.cook_soup(markup=res.content)
         print(self.soup.prettify())
 
@@ -19,7 +21,11 @@ class FindAGrave(Spider, RequestsMixin):
 
 
 
-class FindAPlaywrightGrave(Spider, PlaywrightMixin):
+
+
+
+
+class FindAPlaywrightGrave(PlaywrightSpider):
 
     url = "https://www.findagrave.com"
 

@@ -13,7 +13,7 @@ age - int
 address
 ====================
 skip - fk
-current address - bool
+last known - bool
 street address - char
 city - char
 state - char (choices)
@@ -25,6 +25,7 @@ zip code - char
 phone
 ====================
 number - char
+last_known - bool
 skip - fk
 
 @unified format
@@ -73,13 +74,6 @@ is error - bool default=False
 
 
 
-corrupt scrape entry
-====================
-scraper - fk
-key - char
-value[:255] - char max_length=255
-date created - datetime
-
 
 bank account
 ====================
@@ -99,7 +93,14 @@ expiry - char null=True
 
 
 
+Error handling:
 
+corrupt scrape entry
+====================
+scraper - fk
+key - char
+value[:255] - char max_length=255
+date created - datetime
 
 
 
