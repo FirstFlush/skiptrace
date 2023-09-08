@@ -1,4 +1,3 @@
-# import brotli
 import logging
 import random
 import requests
@@ -12,31 +11,39 @@ from bs4 import BeautifulSoup, FeatureNotFound, ParserRejectedMarkup
 logging.basicConfig(level=logging.WARNING)
 
 
-class ScraperError(BaseException):
-    """Base class for scraper-related errors."""
+class SpiderError(BaseException):
+    """Base class for spider-related errors."""
     pass
 
-class HttpResponseError(ScraperError):
+
+class HttpResponseError(SpiderError):
     """Raised when HTTP request returns a status code of
     4xx or 5xx.
     """
     pass
 
-class CookSoupError(ScraperError):
+class CookSoupError(SpiderError):
     """Raised when scraper's self.soup() method fails."""
     pass
 
-class CheckSoupError(ScraperError):
+class CheckSoupError(SpiderError):
     """Raised when the scraper's _check_soup() method fails."""
+    pass
 
-class SoupParsingError(ScraperError):
+class MajorSoupParsingError(Exception):
     """Raised when BeautifulSoup fails to find the selection
-    in the markdown.
+    in the markdown and must therefore report a corrupt entry.
+    """
+    pass
+
+class MinorSoupParsingError(Exception):
+    """Raised when BeautifulSoup fails to find the selection
+    in the markdown and can simply continue.
     """
     pass
 
 
-class PageGrabber:
+class Spider:
 
     def __init__(self):
         self.ua:str = ua_generator.generate(device="desktop").text
@@ -47,6 +54,15 @@ class PageGrabber:
         """A hook for inserting custom validation of the BeautifulSoup 
         object or markup.
         """
+        return
+
+
+    def _soup(self, markup:str|bytes, **kwargs):
+        """Instantiates BeautifulSoup object and sets it to self.soup"""
+        try:
+            self.soup = BeautifulSoup(markup=markup, features='lxml', **kwargs)
+        except (FeatureNotFound, ValueError, ParserRejectedMarkup) as e:
+            raise e
         return
 
 
@@ -66,16 +82,6 @@ class PageGrabber:
         return
 
 
-    def _soup(self, markup:str|bytes, **kwargs):
-        """Instantiates BeautifulSoup object and sets it to self.soup"""
-        try:
-            self.soup = BeautifulSoup(markup=markup, features='lxml', **kwargs)
-        except (FeatureNotFound, ValueError, ParserRejectedMarkup) as e:
-            raise e
-        return
-
-
-
     def random_delay(self, l:int=3, h:int=8):
         """Random time delay. 
         To make us look more human :)
@@ -85,7 +91,7 @@ class PageGrabber:
 
 
 class RequestsMixin:
-    """Mixin class for PageGrabber to add requests functionality."""
+    """Mixin class for Spider to add requests functionality."""
 
     def _headers(self) -> dict:
         """Currently headers is static except for UA. 
@@ -116,7 +122,7 @@ class RequestsMixin:
 
 
 class PlaywrightMixin:
-    """Mixin class for PageGrabber to add playwright functionality."""
+    """Mixin class for Spider to add playwright functionality."""
 
     def sync(self, browser:str='chromium', headless:bool=False):
         """Sync Chromium webdriver and open the browser."""
@@ -148,7 +154,7 @@ class PlaywrightMixin:
 
 
 
-# class FindAGrave(PageGrabber, PlaywrightMixin):
+# class FindAGrave(Spider, PlaywrightMixin):
 
 #     def __init__(self):
 #         # super().__init__()
@@ -163,7 +169,7 @@ class PlaywrightMixin:
 #         self.shutdown()
 
 
-# class FindAnotherGrave(PageGrabber, RequestsMixin):
+# class FindAnotherGrave(Spider, RequestsMixin):
 
 #     def __init__(self):
 #         s = self.session()

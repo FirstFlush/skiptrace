@@ -73,12 +73,12 @@ is error - bool default=False
 
 
 
-
-
-
-
-
-
+corrupt scrape entry
+====================
+scraper - fk
+key - char
+value[:255] - char max_length=255
+date created - datetime
 
 
 bank account

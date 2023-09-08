@@ -1,12 +1,12 @@
 # from ..base_scrapers import PageGrabber, RequestsMixin#, PlaywrightMixin
-from webscraping.base_scrapers import PageGrabber, RequestsMixin
-from bs4 import BeautifulSoup
+from webscraping.spider import Spider, RequestsMixin
+
 
 base_url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
 
 
-class SynchronyScraper(PageGrabber, RequestsMixin):
+class SynchronyScraper(Spider, RequestsMixin):
 
     url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
