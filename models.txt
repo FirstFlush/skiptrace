@@ -58,6 +58,29 @@ difficulty - char (choices)
 
 
 
+urls
+====================
+company name - char
+type - char (choices*)
+url - url
+is error - bool default=False
+
+@encountered error, change is_error to True
+
+*url types will include:
+    -urls we must submit info to
+    -base urls for scraping
+
+
+
+
+
+
+
+
+
+
+
 bank account
 ====================
 account num - char
