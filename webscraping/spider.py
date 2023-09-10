@@ -180,6 +180,8 @@ class PlaywrightSpider(Spider):
     """This class adds playwright functionality to our spider class."""
     
     def __init__(self):
+        self.p = None
+        self.browser = None
         self.page = None
 
 
@@ -196,6 +198,7 @@ class PlaywrightSpider(Spider):
         self.page = self.browser.new_page()
         return
 
+
     def goto(self, url, timeout:float=5000, **kwargs) -> ResponsePlaywright|None:
         """Wrapper function for playwright's page.goto() method to
         includes error handling and logging.
@@ -209,6 +212,7 @@ class PlaywrightSpider(Spider):
         except (PlaywrightError, PlaywrightTimeoutError) as e:
             self.log(SpiderHttpError(repr(e)), LogLevel.ERROR)
         return res
+
 
     def shutdown(self):
         """Shuts down the web browser"""

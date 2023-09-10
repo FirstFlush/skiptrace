@@ -5,14 +5,22 @@ Tech Stack
 Server:     Nginx
 WSGI:       gunicorn                ?
 Backend:    FastAPI
-Frontend*:  
+Frontend:                           *
 DB:         SQL
 DBMS:       Postgres                ?
 ORM:        Tortoise
-MQ*:        RabbitMQ
+MQ:         RabbitMQ                *
 Logging:    structlog
 Testing:    TestClient or pytest
 Test Data:  Factory Boy
+
+
+Async tool:
+    -Tortoise ORM
+    -FastAPI
+    -asyncio
+    -aiohttp
+    -asyncpg
 
 Scrapers:   
     -requests/bs4

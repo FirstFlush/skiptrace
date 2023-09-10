@@ -4,7 +4,7 @@ skip
 =====================
 first name - char
 last name - char
-age - int
+bday - date
 
 @full name
 @check duplicate address/phone/relative

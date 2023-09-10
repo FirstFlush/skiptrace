@@ -1,0 +1,57 @@
+
+Client App
+=========================================
+-client app will be a small set of scripts on our local machine.
+-these scripts will perform the intake of all credit files.
+-credit files will be parsed for all information and that information 
+will then be sent to the DB server for storage.
+-This method ensures raw credit files never leave our local machine.
+
+
+TBD
+=========================================
+-should each client be assigned a reference number?
+    -ref# will be consistent on DB server and on local machine
+    -ref# can be used to further query DB server about individual Skip
+-How to do error handling/logging?
+-Option to view the structured data before it is blasted off to server?
+-Save structured data on local machine to confirm its correct?
+
+
+Scripts
+=========================================
+-credit file parsing script
+    -bs4 with open()
+    -loop through files and create the structured JSON data
+        -list of dictionaries
+-HMAC signing script
+    -secret key storage is main issue here
+    -HMAC headers will be different from Django style
+-data transfer script
+    -use HTTPS to send HMAC-signed data to protected endpoint on server
+
+
+Interface
+=========================================
+command line
+
+
+Data Transfer
+=========================================
+-use python requests library
+-HTTPS POST request
+-structured JSON data
+
+
+Security
+=========================================
+-HTTPS
+-HMAC
+-Storage for private key:
+    -encrypted file
+    -at runtime script prompts user for pw
+        -getpass python module
+    -pw success decrypts file containing HMAC key /other sensitive shit
+
+
+    
