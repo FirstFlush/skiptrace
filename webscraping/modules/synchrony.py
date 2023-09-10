@@ -4,7 +4,7 @@ from webscraping.spider import RequestsSpider
 
 
 
-class SynchronyScraper(RequestsSpider):
+class SynchronyA(RequestsSpider):
 
     url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
@@ -13,7 +13,4 @@ class SynchronyScraper(RequestsSpider):
         
 
 
-
-
-
-SynchronyScraper()
+SynchronyA()

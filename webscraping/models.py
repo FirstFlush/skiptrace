@@ -1,3 +1,5 @@
+from typing import Awaitable, List
+
 from tortoise.models import Model
 from tortoise import fields
 
@@ -5,7 +7,28 @@ from tortoise import fields
 class SpiderAsset(Model):
 
     spider_name     = fields.CharField(max_length=255)
-    file_path       = fields.CharField(max_length=255)
     error_count     = fields.SmallIntField(default=0)
     is_active       = fields.BooleanField(default=True)
+    date_modified   = fields.DatetimeField(auto_now=True)
     date_created    = fields.DatetimeField(auto_now_add=True)
+
+
+    async def deactivate(self):
+        self.is_active = False
+        await self.save()
+
+
+    def file_path(self, modules_path:str) -> str:
+        """Returns the full file path, assuming the naming convention is:
+        Class   SpiderName
+        File    spidername.py
+        """
+        path = f"{modules_path}/{self.spider_name.lower()}.py"
+        return path
+
+
+    @classmethod
+    async def get_active(cls) -> Awaitable[List["SpiderAsset"]]:
+        """Returns all active Spider assets"""
+        spiders = await cls.filter(is_active=True)
+        return spiders

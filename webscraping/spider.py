@@ -6,10 +6,13 @@ import ua_generator
 
 from enum import Enum
 from bs4 import BeautifulSoup, FeatureNotFound, ParserRejectedMarkup
-from playwright.sync_api import sync_playwright, Response as ResponsePlaywright
+from playwright.async_api import async_playwright, Response as ResponsePlaywright
 from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
 import config
+
+from .err import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -31,39 +34,6 @@ class LogLevel(Enum):
 #     WEBKIT = "webkit"
 
 
-class WebScrapingError(BaseException):
-    """Base class for all webscraping errors."""
-    pass
-
-class SpiderError(WebScrapingError):
-    """Base class for spider-related errors."""
-    pass
-
-class SpiderHttpError(SpiderError):
-    """Raised when HTTP request returns a status code of
-    4xx or 5xx.
-    """
-    pass
-
-class CookSoupError(SpiderError):
-    """Raised when scraper's self.soup() method fails."""
-    pass
-
-class CheckSoupError(SpiderError):
-    """Raised when the scraper's _check_soup() method fails."""
-    pass
-
-class MajorSoupParsingError(Exception):
-    """Raised when BeautifulSoup fails to find the selection
-    in the markdown and must therefore report a corrupt entry.
-    """
-    pass
-
-class MinorSoupParsingError(Exception):
-    """Raised when BeautifulSoup fails to find the selection
-    in the markdown and can simply continue.
-    """
-    pass
 
 
 class Spider:
@@ -187,7 +157,7 @@ class PlaywrightSpider(Spider):
 
     def sync(self, browser:str='chromium', headless:bool=False):
         """Sync Chromium webdriver and open the browser."""
-        self.p = sync_playwright().start()
+        self.p = async_playwright().start()
         match browser:
             case 'firefox':
                 self.browser = self.p.firefox.launch(headless=headless)
