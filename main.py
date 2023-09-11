@@ -1,12 +1,10 @@
-from enum import Enum
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
 from skip.routes import router as router_skip
 from webscraping.routes import router as router_scrape
 
-import config
-
+from config import POSTGRES_DB, all_models
 
 # Initialize FastAPI & Routes
 # =================================================
@@ -19,11 +17,13 @@ app.include_router(router_scrape, prefix="/scrape", tags=["webscraping"])
 # =================================================
 TORTOISE_ORM = {
     'connections': {
-        'default': config.POSTGRES_DB
+        # 'default': config.POSTGRES_DB
+        'default': POSTGRES_DB
     },
     'apps': {
         'models': {
-            'models': config.all_models,
+            # 'models': config.all_models,
+            'models': all_models,
             'default_connection': 'default',
         },
     },

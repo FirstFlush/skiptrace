@@ -7,7 +7,11 @@ class SpiderError(WebScrapingError):
     """Base class for spider-related errors."""
     pass
 
-class SpiderModuleNotFound(SpiderError):
+class SpiderLaunchError(WebScrapingError):
+    """Base class for errors related to the spider launcher."""
+
+
+class SpiderModuleNotFound(SpiderLaunchError):
     """Spider module can not be imported. Please check the file path and class name."""
     pass
 

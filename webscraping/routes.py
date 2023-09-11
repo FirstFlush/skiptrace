@@ -2,7 +2,7 @@ import asyncio
 
 from fastapi import APIRouter
 from .launcher import SpiderLauncher
-from .models import SpiderAsset
+from .models import SpiderAsset, SpiderError
 # from skip.models import Bank
 
 
@@ -14,10 +14,6 @@ async def root():
 
     sl = SpiderLauncher()
     await sl.initialize()
-    
-    # for spider in sl.spiders:
-    #     print(spider.file_path(sl.modules))
-
     await sl.launch_spiders()
 
     return {"asdffdsa": "fdafdsaf scrapppe"}
@@ -27,9 +23,27 @@ async def root():
 @router.get("/get_spiders")
 async def get_spiders():
 
+    spiders = await SpiderAsset.all()
+    spider = spiders[0]
+    errors = await spider.errors()
+    error_count = await spider.error_count()
+    print(errors)
+    print(error_count)
+
     # await SpiderAsset.create(
     #     spider_name = "FindAGrave"
     # )
-    spiders = await SpiderAsset.all()
-    print(spiders)
+    # spiders = await SpiderAsset.all()
+    # spider = spiders[0]
+
+    # error = await SpiderError.create(
+    #     spider_id = spider,
+    #     error = "SpiderHttpError",
+    # )
+    
+    # print(spider)
+    # print(error)
+
+
+
     return {"hi":"ho"}

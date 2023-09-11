@@ -1,8 +1,8 @@
 from tortoise.models import Model
 from tortoise import fields
 
-from data.model_enums import StateEnum
-from data.custom_fields import EmailField, URLField
+from common.enums import StateEnum
+from common.fields import EmailField, URLField
 
 
 class Skip(Model):

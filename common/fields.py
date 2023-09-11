@@ -1,5 +1,6 @@
+# File for storing custom Tortoise-ORM Model fields
+
 from fastapi import HTTPException
-# from tortoise.models import Model
 from tortoise import fields
 import validators
 

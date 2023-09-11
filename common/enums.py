@@ -1,12 +1,13 @@
+# File for storing commonly used Enums
 from enum import Enum
 
 
-
-# class BankEnum(str, Enum):
-
-#     Bank_of_America = "BOA"
-#     Wells_Fargo = "Wells_Fargo"
-#     CapitalOne = "CapitalOne"
+class LogLevel(Enum):
+    CRITICAL = "critical"
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+    DEBUG = "debug"
 
 
 class StateEnum(str, Enum):
@@ -61,5 +62,3 @@ class StateEnum(str, Enum):
     Wisconsin = "WI"
     West_Virginia = "WV"
     Wyoming = "WY"
-
-    

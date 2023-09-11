@@ -4,36 +4,14 @@ import requests
 import time
 import ua_generator
 
-from enum import Enum
 from bs4 import BeautifulSoup, FeatureNotFound, ParserRejectedMarkup
 from playwright.async_api import async_playwright, Response as ResponsePlaywright
 from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
-import config
+from common.enums import LogLevel
+from .exceptions import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
 
-from .err import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
-
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename=f"{config.LOG_DIR}/scraping.log",
-    level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-class LogLevel(Enum):
-    CRITICAL = "critical"
-    ERROR = "error"
-    WARNING = "warning"
-    INFO = "info"
-    DEBUG = "debug"
-
-
-# class WebDriver(Enum):
-#     FIREFOX = "firefox"
-#     CHROMIUM = "chromium"
-#     WEBKIT = "webkit"
-
-
+logger = logging.getLogger('scraping')
 
 
 class Spider:

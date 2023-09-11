@@ -4,13 +4,13 @@ from webscraping.spider import RequestsSpider
 
 
 
-class SynchronyA(RequestsSpider):
+class Synchrony(RequestsSpider):
 
     url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
-    def __init__(self):
-        super().__init__()
-        
+    def run(self):
+        # super().__init__()
+        print('Synchrony spider')
+        return
 
-
-SynchronyA()
+# Synchrony()
