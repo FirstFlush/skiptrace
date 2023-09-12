@@ -1,16 +1,19 @@
 # from ..spider import RequestsSpider
-from webscraping.spider import RequestsSpider
+from webscraping.spider import AsyncSpider
+from asyncio import sleep as async_sleep
 
 
-
-
-class Synchrony(RequestsSpider):
+class Synchrony(AsyncSpider):
 
     url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
-    def run(self):
+
+
+    async def run(self):
         # super().__init__()
-        print('Synchrony spider')
+        # print('Synchrony Spider finished')
+        # async_sleep(3)
+        await self.close_session()
         return
 
 # Synchrony()

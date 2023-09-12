@@ -14,8 +14,15 @@ async def root():
 
     sl = SpiderLauncher()
     await sl.initialize()
-    await sl.launch_spiders()
+    await sl.launch()
 
+    # print()
+    # print("broken spiders: ", sl.broken_spiders)
+
+    # print()
+    # se = await SpiderError().all()
+    # print(se)
+    # print(len(se))
     return {"asdffdsa": "fdafdsaf scrapppe"}
 
 

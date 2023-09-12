@@ -1,3 +1,6 @@
+import aiodns
+import aiohttp
+import asyncio
 import logging
 import random
 import requests
@@ -11,22 +14,46 @@ from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, 
 from common.enums import LogLevel
 from .exceptions import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
 
+
 logger = logging.getLogger('scraping')
 
 
 class Spider:
     """Base class for all webscrapers"""
-    soup = None
-    url = None
 
+    is_error = False
+    
     def __init__(self):
         self.ua:str = ua_generator.generate(device="desktop").text
+        self.headers:dict = self._headers()
+        self.session = None
+        self.url = None
+        self.soup = None
+        # self.is_error = False
+        self.error = None
+
 
     def _check_soup(self):
         """A hook for inserting custom validation of the BeautifulSoup 
         object or markup.
         """
         return
+
+    def _headers(self) -> dict:
+        """Currently headers is static except for UA. 
+        Will put in functionality here to make the other 
+        headers more dynamic.
+        """
+        headers = {
+            "User-Agent": self.ua,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-US,en;q=0.9",
+            "DNT": "1",  # Do Not Track Request Header
+            "Connection": "close",
+            "Upgrade-Insecure-Requests": "1",   
+        }
+        return headers
 
     def _soup(self, markup:str|bytes, **kwargs):
         """Instantiates BeautifulSoup object and sets it to self.soup"""
@@ -50,6 +77,8 @@ class Spider:
             self.log(CheckSoupError(repr(e)), LogLevel.ERROR)
         return
 
+
+
     def log(self, e:WebScrapingError, level:LogLevel=LogLevel.ERROR):
         """Logging method to track all issues related to web scraping."""
         match level:
@@ -67,35 +96,54 @@ class Spider:
                 logger.critical(f"Unexpected log level: {level}. Original error: {repr(e)}")
         return
 
-    def random_delay(self, l:int=2, h:int=8):
+
+    def raise_error(self, e:WebScrapingError, as_e:BaseException, level:LogLevel=LogLevel.ERROR):
+        """Logs error with self.log() and then sets self.is_error to True and sets self.error
+        to the class name of the error "e".
+        """
+        self.log(e(repr(as_e)), level)
+        self.is_error = True
+        self.error = e
+        return
+
+
+    async def random_delay(self, l:int=2, h:int=8):
         """Random time delay. 
         To make us look more human :)
         """
-        time.sleep(random.randint(l, h))
+        s = random.randint(l, h)
+        await asyncio.sleep(s)
         return
+
+
+class AsyncSpider(Spider):
+
+    def __init__(self):
+        # super().__init__()
+        self.session = aiohttp.ClientSession()
+
+
+    async def get(self, url:str=None) -> str:
+        """Make an async request via aiohttp module."""
+        if url is None:
+            url = self.url
+        try:
+            async with self.session.get(url) as response:
+                return await response.text()
+        except aiohttp.ClientError as e:
+            # self.log(SpiderHttpError(repr(e)), LogLevel.ERROR)
+            self.raise_error(SpiderHttpError, e, LogLevel.ERROR)
+            await self.close_session()
+
+    async def close_session(self):
+        if self.session:
+            await self.session.close()
 
 
 class RequestsSpider(Spider):
     """This class gives python's requests library functionality to
     our spiders.
     """
-
-    def _headers(self) -> dict:
-        """Currently headers is static except for UA. 
-        Will put in functionality here to make the other 
-        headers more dynamic.
-        """
-        headers = {
-            "User-Agent": self.ua,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
-            "DNT": "1",  # Do Not Track Request Header
-            "Connection": "close",
-            "Upgrade-Insecure-Requests": "1",   
-        }
-        return headers
-
 
     def get(self, session:requests.Session, **kwargs) -> requests.Response | None:
         """Wrapper function for requests library's session.get() with

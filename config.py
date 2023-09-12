@@ -1,8 +1,11 @@
 import logging
 import os
 from dotenv import load_dotenv
-from enum import Enum
-# from tortoise.contrib.fastapi import register_tortoise
+
+
+# Debug Status
+# =================================================
+DEBUG = False
 
 
 # Env Vars & Constants
@@ -41,28 +44,25 @@ all_models = [
 
 # Logger
 # ====================================================
+scraping_logger = logging.getLogger('scraping')
+if DEBUG == True:
+    scraping_logger.setLevel(logging.DEBUG)
+else:
+    scraping_logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stream_formatter = logging.Formatter('%(levelname)s:     %(message)s')
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.DEBUG)
+stream_handler.setFormatter(stream_formatter)
+
+scraping_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
+scraping_handler.setLevel(logging.WARNING)
+scraping_handler.setFormatter(formatter)
+
+scraping_logger.addHandler(scraping_handler)
+scraping_logger.addHandler(stream_handler)
 # telephony_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
 # data_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
-scraping_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-scraping_handler.setFormatter(formatter)
-scraping_logger = logging.getLogger('scraping')
-scraping_logger.setLevel(logging.WARNING)
-scraping_logger.addHandler(scraping_handler)
-
-
-# logger = logging.getLogger(__name__)
-# logging.basicConfig(
-#     filename=f"{LOG_DIR}/scraping.log",
-#     level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s'
-# )
-
-# class LogLevel(Enum):
-#     CRITICAL = "critical"
-#     ERROR = "error"
-#     WARNING = "warning"
-#     INFO = "info"
-#     DEBUG = "debug"
-
-
 

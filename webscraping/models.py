@@ -13,6 +13,15 @@ class SpiderAsset(Model):
     date_created    = fields.DatetimeField(auto_now_add=True)
 
 
+    async def activate(self):
+        """Activates the spider so it will be loaded into
+        the SpiderLauncher
+        """
+        self.is_active = True
+        await self.save()
+        return
+
+
     async def deactivate(self):
         """Deactivates the spider so it will not be loaded into
         the SpiderLauncher

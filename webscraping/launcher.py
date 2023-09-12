@@ -2,14 +2,14 @@ import aiohttp
 import asyncio
 import importlib
 import logging
-from concurrent.futures import ThreadPoolExecutor
+import time
 
 from common.enums import LogLevel
 from config import SPIDER_MODULES
 # from .models import SpiderAsset
 # from .spider import SpiderModuleNotFound
-from webscraping.models import SpiderAsset
-from webscraping.exceptions import SpiderModuleNotFound
+from webscraping.models import SpiderAsset, SpiderError
+from webscraping.exceptions import SpiderModuleNotFound, BrokenSpidersError
 
 logger = logging.getLogger("scraping")
 
@@ -21,6 +21,7 @@ class SpiderLauncher:
     def __init__(self):
         self.spiders = []
         self.spider_count = 0
+        self.broken_spiders:list[tuple] = []
 
 
     async def initialize(self):
@@ -30,49 +31,72 @@ class SpiderLauncher:
         return
 
 
-    async def launch_spiders(self): 
+    def broken_spider(self, spider_id:int, error_name:str):
+        """When a spider fails, append the spider ID
+        to self.broken_spiders
+        """
+        self.broken_spiders.append((spider_id, error_name))
+        return
+
+
+    async def launch(self): 
         """Iterates through all the spiders and calls launch_spider()"""
-        # await asyncio.gather(*(self.launch_spider(spider.spider_name) for spider in self.spiders))
-        # return
-
         tasks = []
-        tasks = [asyncio.create_task(self.launch_spider(spider.spider_name)) for spider in self.spiders]
-        with ThreadPoolExecutor() as executor:
-
-            for spider in self.spiders:
-                task = asyncio.create_task(self.launch_spider(spider.spider_name))
-                tasks.append(task)
-            await asyncio.gather(*tasks)
-        # with ThreadPoolExecutor() as executor:
-        #     for spider in self.spiders:
-        #         task = asyncio.create_task(self.launch_spider(spider.spider_name))
-        #         tasks.append(task)
-        #     await asyncio.gather(*tasks)
+        logger.info(f"Launching {len(self.spiders)} spiders...")
+        for spider in self.spiders:
+            logger.debug(spider.spider_name)
+            task = asyncio.create_task(self.launch_spider(spider))
+            tasks.append(task)
+        await asyncio.gather(*tasks)
+        
+        logger.info("All spiders have returned")
+        logger.info(f"Broken spiders: {len(self.broken_spiders)}")
+        if len(self.broken_spiders) > 0:
+            self.log_errors()
+            await self.record_errors()
 
         return
 
 
-    async def launch_spider(self, spider_name:str):
+    async def launch_spider(self, sa:SpiderAsset):
         """Dynamically import the spider module and instantiate the class
         associated with spider_name. Spiders are configured to run on
         instantiation.
         """
-        print('spider name: ', spider_name)
-        module_name = f"webscraping.modules.{spider_name.lower()}"
+        # print('Starting:    ', sa.spider_name)
+        module_name = f"webscraping.modules.{sa.spider_name.lower()}"
         module = importlib.import_module(module_name)
         try:
-            SpiderClass = getattr(module, spider_name)
+            SpiderClass = getattr(module, sa.spider_name)
         except AttributeError as e:
             logger.error(f"{repr(SpiderModuleNotFound(e))}")
-            spider = await SpiderAsset.get(spider_name=spider_name)
-            await spider.deactivate()
+            self.broken_spider(sa.id, SpiderModuleNotFound)
         else:    
             spider = SpiderClass()
             await spider.run()
+            # print('--------------------')
+            # print(sa.spider_name)
+            # print(spider.__dict__)
+            # print()
+            if spider.is_error == True:
+                self.broken_spider(sa.id, spider.error)
+        return
 
-# async def main():
-#     launcher = SpiderLauncher()
-#     await launcher.initialize()
+
+    def log_errors(self):
+        """Creates a BrokenSpiders log entry"""
+        num = len(self.broken_spiders)
+        logger.error(repr(BrokenSpidersError(f"{num} broken spider{'' if num==1 else 's'}")))
+        return
+    
+
+    async def record_errors(self):
+        """Creates a SpiderError object in the DB for each of 
+        the spiders in self.broken_spiders
+        """
+        # print('record: ', self.broken_spiders)
+        spider_errors = [SpiderError(spider_id_id=spider_id, error=error.__class__.__name__) for spider_id, error in self.broken_spiders]
+        await SpiderError.bulk_create(spider_errors)
+        return
 
 
-# asyncio.run(main())

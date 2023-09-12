@@ -9,11 +9,18 @@ class SpiderError(WebScrapingError):
 
 class SpiderLaunchError(WebScrapingError):
     """Base class for errors related to the spider launcher."""
+    def __init__(self, broken_spiders:int):
+        self.message = f"{broken_spiders} broken spiders." 
 
 
 class SpiderModuleNotFound(SpiderLaunchError):
     """Spider module can not be imported. Please check the file path and class name."""
     pass
+
+class BrokenSpidersError(SpiderLaunchError):
+    """Raised when 1 or more spiders raises an error and fails to scrape."""
+    pass
+
 
 class SpiderHttpError(SpiderError):
     """Raised when HTTP request returns a status code of
