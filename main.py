@@ -1,3 +1,4 @@
+# import logging
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
@@ -35,3 +36,6 @@ register_tortoise(
     generate_schemas=False,  # Automatically create database tables for Tortoise models on startup.
     add_exception_handlers=True,
 )
+
+# logger = logging.getLogger('scraping')
+# logger.info("Synced with Tortoise-ORM")

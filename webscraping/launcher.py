@@ -42,6 +42,7 @@ class SpiderLauncher:
     async def launch(self): 
         """Iterates through all the spiders and calls launch_spider()"""
         tasks = []
+        logger.critical('blehh')
         logger.info(f"Launching {len(self.spiders)} spiders...")
         for spider in self.spiders:
             logger.debug(spider.spider_name)

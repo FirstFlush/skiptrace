@@ -1,11 +1,11 @@
 import logging
 import os
 from dotenv import load_dotenv
-
+from termcolor import colored
 
 # Debug Status
 # =================================================
-DEBUG = False
+DEBUG = True
 
 
 # Env Vars & Constants
@@ -42,16 +42,33 @@ all_models = [
 ]
 
 
-# Logger
+# Logging
 # ====================================================
+class ColoredFormatter(logging.Formatter):
+
+    COLORS = {
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'red',
+        'DEBUG': 'blue',
+        'INFO': 'green'
+    }
+
+    def format(self, record):
+        log_message = super().format(record)
+        color = self.COLORS.get(record.levelname, 'white')
+        colored_levelname = colored(record.levelname, color)
+        return log_message.replace(record.levelname, colored_levelname)
+
+
 scraping_logger = logging.getLogger('scraping')
 if DEBUG == True:
     scraping_logger.setLevel(logging.DEBUG)
 else:
     scraping_logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-stream_formatter = logging.Formatter('%(levelname)s:     %(message)s')
+log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stream_formatter = ColoredFormatter('%(levelname)-10s%(message)s')
 
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.DEBUG)
@@ -59,7 +76,7 @@ stream_handler.setFormatter(stream_formatter)
 
 scraping_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
 scraping_handler.setLevel(logging.WARNING)
-scraping_handler.setFormatter(formatter)
+scraping_handler.setFormatter(log_formatter)
 
 scraping_logger.addHandler(scraping_handler)
 scraping_logger.addHandler(stream_handler)
