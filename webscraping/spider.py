@@ -4,16 +4,15 @@ import asyncio
 import logging
 import random
 import requests
-import time
 import ua_generator
 
-from bs4 import BeautifulSoup, FeatureNotFound, ParserRejectedMarkup
+from bs4 import FeatureNotFound, ParserRejectedMarkup
 from playwright.async_api import async_playwright, Response as ResponsePlaywright
 from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, Error as PlaywrightError
 
 from common.enums import LogLevel
 from .exceptions import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
-
+from .soup import SpiderSoup
 
 logger = logging.getLogger('scraping')
 
@@ -21,16 +20,18 @@ logger = logging.getLogger('scraping')
 class Spider:
     """Base class for all webscrapers"""
 
+    session = None
+    url = None
+    soup = None
     is_error = False
+    error = None
+    scraped_data:list[dict] = []
     
-    def __init__(self):
+
+    def __init__(self, queue:asyncio.Queue, **kwargs):
         self.ua:str = ua_generator.generate(device="desktop").text
-        self.headers:dict = self._headers()
-        self.session = None
-        self.url = None
-        self.soup = None
-        # self.is_error = False
-        self.error = None
+        self.headers:dict = self.create_headers()
+        self.queue = queue
 
 
     def _check_soup(self):
@@ -39,26 +40,11 @@ class Spider:
         """
         return
 
-    def _headers(self) -> dict:
-        """Currently headers is static except for UA. 
-        Will put in functionality here to make the other 
-        headers more dynamic.
-        """
-        headers = {
-            "User-Agent": self.ua,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
-            "DNT": "1",  # Do Not Track Request Header
-            "Connection": "close",
-            "Upgrade-Insecure-Requests": "1",   
-        }
-        return headers
 
     def _soup(self, markup:str|bytes, **kwargs):
         """Instantiates BeautifulSoup object and sets it to self.soup"""
         try:
-            self.soup = BeautifulSoup(markup=markup, features='lxml', **kwargs)
+            self.soup = SpiderSoup(markup=markup, features='lxml', **kwargs)
         except (FeatureNotFound, ValueError, ParserRejectedMarkup) as e:
             raise e
         return
@@ -77,6 +63,22 @@ class Spider:
             self.log(CheckSoupError(repr(e)), LogLevel.ERROR)
         return
 
+
+    def create_headers(self) -> dict:
+        """Currently headers is static except for UA. 
+        Will put in functionality here to make the other 
+        headers more dynamic.
+        """
+        headers = {
+            "User-Agent": self.ua,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-US,en;q=0.9",
+            "DNT": "1",  # Do Not Track Request Header
+            "Connection": "close",
+            "Upgrade-Insecure-Requests": "1",   
+        }
+        return headers
 
 
     def log(self, e:WebScrapingError, level:LogLevel=LogLevel.ERROR):
@@ -118,8 +120,8 @@ class Spider:
 
 class AsyncSpider(Spider):
 
-    def __init__(self):
-        # super().__init__()
+    def __init__(self, queue, **kwargs):
+        super().__init__(queue, **kwargs)
         self.session = aiohttp.ClientSession()
 
 

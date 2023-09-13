@@ -1,9 +1,13 @@
 import asyncio
-
+import logging
 from fastapi import APIRouter
 from .launcher import SpiderLauncher
+from .pipeline import PipelineHandler
 from .models import SpiderAsset, SpiderError
 # from skip.models import Bank
+
+
+logger = logging.getLogger('scraping')
 
 
 router = APIRouter()
@@ -12,9 +16,19 @@ router = APIRouter()
 @router.get("/")
 async def root():
 
-    sl = SpiderLauncher()
+    queue = asyncio.Queue()
+    sl = SpiderLauncher(queue)
+    ph = PipelineHandler(queue)
+    logger.debug('Initializing Pipeline Handler')
     await sl.initialize()
-    await sl.launch()
+    logger.debug('Initialized Spider Launcher')
+
+    
+    await asyncio.gather(sl.launch(),ph.listen())
+
+    # await sl.launch()
+
+
 
     # print()
     # print("broken spiders: ", sl.broken_spiders)

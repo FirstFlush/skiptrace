@@ -1,11 +1,11 @@
-# import logging
+import logging
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
 from skip.routes import router as router_skip
 from webscraping.routes import router as router_scrape
 
-from config import POSTGRES_DB, all_models
+from config import POSTGRES_DB, all_models, scraping_logger
 
 # Initialize FastAPI & Routes
 # =================================================
@@ -37,5 +37,4 @@ register_tortoise(
     add_exception_handlers=True,
 )
 
-# logger = logging.getLogger('scraping')
-# logger.info("Synced with Tortoise-ORM")
+scraping_logger.debug("Synced successfully with Tortoise-ORM")

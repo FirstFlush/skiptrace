@@ -5,4 +5,7 @@ from bs4 import BeautifulSoup
 
 
 class SpiderSoup(BeautifulSoup):
-    pass
+
+    def __init__(self, markup, features, **kwargs):
+        super().__init__(markup=markup, features=features, **kwargs)
+    

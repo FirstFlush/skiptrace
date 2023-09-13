@@ -4,25 +4,27 @@
 
 from webscraping.spider import AsyncSpider, RequestsSpider, PlaywrightSpider
 
-
 class FindAGrave(AsyncSpider):
 
-    url = "https://www.findagrave.com"
+    url = "https://www.findagrave.com/memorial/search?linkedToName=john+smith&page=1#sr-9339398"
 
     async def run(self):
         res = await self.get(self.url)
         if res is None:
             return
 
-        # self.cook_soup(markup=res)
-        # print(self.soup.prettify())
+        self.cook_soup(markup=res)
+        names = self.soup.select('h2.name-grave > i')
+        for name in names:
+            print(name.get_text())
+        print(len(names))
 
-        # bleh = self.soup.select('.grave-search-bg > h1:nth-child(1)')
-        # print(bleh)
-        # print('FindAGrave Spider finished')
+
         await self.close_session()
+        print('FindAGrave Spider finished')
+
+
         return
-    
 
 
 

@@ -60,6 +60,9 @@ class ColoredFormatter(logging.Formatter):
         colored_levelname = colored(record.levelname, color)
         return log_message.replace(record.levelname, colored_levelname)
 
+    # def bold(msg:str):
+    #     return f"\033[1m{msg}\033[0m"
+
 
 scraping_logger = logging.getLogger('scraping')
 if DEBUG == True:

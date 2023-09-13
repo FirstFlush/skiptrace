@@ -56,8 +56,9 @@ class SkipSocialMedia(Model):
 class SkipRelative(Model):
 
     skip_id         = fields.ForeignKeyField('models.Skip', on_delete=fields.CASCADE)
-    first_name      = fields.CharField(max_length=255)
-    last_name       = fields.CharField(max_length=255)
+    name            = fields.CharField(max_length=255)
+    # first_name      = fields.CharField(max_length=255)
+    # last_name       = fields.CharField(max_length=255)
     is_alive        = fields.BooleanField(default=True)
     possible_mmn    = fields.BooleanField(default=False)
     phone           = fields.CharField(max_length=255, null=True)
