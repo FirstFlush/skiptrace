@@ -5,7 +5,7 @@ from termcolor import colored
 
 # Debug Status
 # =================================================
-DEBUG = True
+DEBUG = False
 
 
 # Env Vars & Constants
@@ -18,7 +18,9 @@ else:
     load_dotenv(".env.dev")
 HTTP_TIMEOUT = 5
 SPIDER_MAX_ERRORS = 5
-SPIDER_MODULES = os.getenv("SPIDER_MODULES")
+SPIDER_MODULES = "webscraping.modules.spiders"
+PIPELINE_MODULES = "webscraping.modules.pipelines"
+SENTINEL = None  # value passed into async Queue to stop PipelineListener from listening.
 DB_NAME = os.getenv("DB_NAME")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")

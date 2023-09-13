@@ -4,7 +4,7 @@
 
 from webscraping.spider import AsyncSpider, RequestsSpider, PlaywrightSpider
 
-class FindAGrave(AsyncSpider):
+class FindAGraveSpider(AsyncSpider):
 
     url = "https://www.findagrave.com/memorial/search?linkedToName=john+smith&page=1#sr-9339398"
 
@@ -15,17 +15,22 @@ class FindAGrave(AsyncSpider):
 
         self.cook_soup(markup=res)
         names = self.soup.select('h2.name-grave > i')
-        for name in names:
-            print(name.get_text())
-        print(len(names))
+        # for name in names:
+        #     print(name.get_text())
+        # print(len(names))
+        yield {'names':names}
 
+    # async def fetch(self, url):
+    #     """Simulated asynchronous fetch function."""
+    #     await asyncio.sleep(1)  # Simulating async IO-bound operation
+    #     # In a real scenario, you'd fetch the content and parse it here
+    #     return {"url": url, "data": "Some scraped data from " + url}
 
-        await self.close_session()
-        print('FindAGrave Spider finished')
-
-
-        return
-
+    # async def run(self):
+    #     """Asynchronous generator yielding data as it scrapes each URL."""
+    #     for url in self.urls:
+    #         scraped_data = await self.fetch(url)
+    #         yield scraped_data
 
 
 class FindARequestsGrave(RequestsSpider):

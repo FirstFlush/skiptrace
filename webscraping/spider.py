@@ -19,7 +19,6 @@ logger = logging.getLogger('scraping')
 
 class Spider:
     """Base class for all webscrapers"""
-
     session = None
     url = None
     soup = None
@@ -27,11 +26,9 @@ class Spider:
     error = None
     scraped_data:list[dict] = []
     
-
-    def __init__(self, queue:asyncio.Queue, **kwargs):
+    def __init__(self):
         self.ua:str = ua_generator.generate(device="desktop").text
         self.headers:dict = self.create_headers()
-        self.queue = queue
 
 
     def _check_soup(self):
@@ -120,8 +117,8 @@ class Spider:
 
 class AsyncSpider(Spider):
 
-    def __init__(self, queue, **kwargs):
-        super().__init__(queue, **kwargs)
+    def __init__(self):
+        super().__init__()
         self.session = aiohttp.ClientSession()
 
 

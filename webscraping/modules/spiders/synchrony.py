@@ -3,7 +3,7 @@ from webscraping.spider import AsyncSpider
 from asyncio import sleep as async_sleep
 
 
-class Synchrony(AsyncSpider):
+class SynchronySpider(AsyncSpider):
 
     url = "https://www.synchrony.com/for-consumers.html#credit-cards"
 
@@ -12,10 +12,10 @@ class Synchrony(AsyncSpider):
         # print('Synchrony Spider finished')
         # async_sleep(3)
 
+        yield {'snychrony':'blahh'}
 
-
-        await self.close_session()
-        print('synchrony finished')
-        return
+        # await self.close_session()
+        # print('synchrony finished')
+        # return
 
 # Synchrony()

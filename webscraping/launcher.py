@@ -6,10 +6,11 @@ from datetime import datetime
 
 
 # from common.enums import LogLevel
-from config import SPIDER_MODULES
+from config import SENTINEL
 # from .models import SpiderAsset
 # from .spider import SpiderModuleNotFound
-from webscraping.spider import Spider
+# from webscraping.pipeline import Pipeline
+# from webscraping.spider import Spider
 from webscraping.models import SpiderAsset, SpiderError
 from webscraping.exceptions import SpiderModuleNotFound, BrokenSpidersError
 
@@ -22,21 +23,21 @@ class SpiderLauncher:
     and feed them into the database pipeline.
     """
 
-    modules:str = SPIDER_MODULES
+    # modules:str = SPIDER_MODULES
 
-    def __init__(self, queue:asyncio.Queue):
-        self.spiders:list[SpiderAsset] = []
-        self.spider_count = 0
-        self.broken_spiders:list[tuple] = []
-        self.queue = asyncio.Queue()
-
-
-
-    async def initialize(self):
-        """Fetch the active SpiderAssets and await them."""
-        self.spiders = await SpiderAsset.get_active()
+    def __init__(self, queue:asyncio.Queue, spiders:list[SpiderAsset]):
+        self.spiders = spiders
         self.spider_count = len(self.spiders)
-        return
+        self.broken_spiders:list[tuple] = []
+        self.queue = queue
+        self.sentinel = SENTINEL
+
+
+    # async def initialize(self):
+    #     """Fetch the active SpiderAssets and await them."""
+    #     self.spiders = await SpiderAsset.get_active()
+    #     self.spider_count = len(self.spiders)
+    #     return
 
 
     def broken_spider(self, spider_id:int, error_name:str):
@@ -45,6 +46,23 @@ class SpiderLauncher:
         """
         self.broken_spiders.append((spider_id, error_name))
         return
+
+
+    async def send_to_queue(self, spider_id:int, data:dict):
+        """Pass a spider's scraped data into the asyncio Queue, 
+        to be consumed by the PipelineListener
+        """
+        if bool(data):
+            data = {'id':spider_id} | data
+            await self.queue.put(data)
+
+        return
+
+
+    async def close_queue(self):
+        """Closes the async Queue by passing in the sentinel value."""
+        logger.debug("Sending sentinel value to PipelineListener...")
+        await self.queue.put(self.sentinel)
 
 
     async def launch(self): 
@@ -57,12 +75,12 @@ class SpiderLauncher:
             logger.debug(f"-{spider.spider_name} launched")
             tasks.append(task)
         await asyncio.gather(*tasks)
-
         end = datetime.now()
+        await self.close_queue()
         logger.info(f"{end.strftime('%H:%M:%S.%f')} Scraping complete")
-        logger.info(f"{(end - start)} seconds to finish")
-        # log_method = logger.warning if len(self.broken_spiders) else logger.info
-        # log_method(f"Broken spiders: {len(self.broken_spiders)}")
+        logger.info(f"\033[1m{(end - start)}\033[0m seconds to finish")
+
+
 
         if len(self.broken_spiders) > 0:
             self.log_errors()
@@ -73,34 +91,22 @@ class SpiderLauncher:
         return
 
 
-    def get_spider_module(self, sa:SpiderAsset) -> Spider | None:
-        """Dynamically imports the underlying Spider subclass that 
-        the SpiderAsset is based on.
-        """
-        SpiderClass = None
-        module_name = f"webscraping.modules.spiders.{sa.spider_name.lower()}"
-        module = importlib.import_module(module_name)
-        try:
-            SpiderClass = getattr(module, sa.spider_name)
-        except AttributeError as e:
-            logger.error(f"{repr(SpiderModuleNotFound(e))}")
-            self.broken_spider(sa.id, SpiderModuleNotFound)
-
-        return SpiderClass
-
-
     async def launch_spider(self, sa:SpiderAsset):
         """Dynamically import the spider module and instantiate the class
         associated with spider_name. Spiders are configured to run on
         instantiation.
         """
-        SpiderClass = self.get_spider_module(sa)
+        SpiderClass = sa.get_spider()
         if SpiderClass is not None:
-            spider = SpiderClass(self.queue)
-            await spider.run()
+            spider = SpiderClass()
+            async for scraped_data in spider.run():
+                await self.send_to_queue(spider_id=sa.id, data=scraped_data)
+            await spider.close_session()
             if spider.is_error == True:
                 self.broken_spider(sa.id, spider.error)
                 logger.error(f"\033[1mBROKEN SPIDER\033[0m - {sa.spider_name}")
+        else:
+            logger.error(f"{repr(SpiderModuleNotFound(sa.spider_name))}")
         return
 
 
