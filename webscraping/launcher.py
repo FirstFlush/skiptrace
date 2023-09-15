@@ -78,7 +78,7 @@ class SpiderLauncher:
         end = datetime.now()
         await self.close_queue()
         logger.info(f"{end.strftime('%H:%M:%S.%f')} Scraping complete")
-        logger.info(f"\033[1m{(end - start)}\033[0m seconds to finish")
+        logger.info(f"\033[1m{(end - start)}\033[0m elapsed")
 
 
 
@@ -105,8 +105,8 @@ class SpiderLauncher:
             if spider.is_error == True:
                 self.broken_spider(sa.id, spider.error)
                 logger.error(f"\033[1mBROKEN SPIDER\033[0m - {sa.spider_name}")
-        else:
-            logger.error(f"{repr(SpiderModuleNotFound(sa.spider_name))}")
+        # else:
+        #     logger.error(f"{repr(SpiderModuleNotFound(sa.spider_name))}")
         return
 
 

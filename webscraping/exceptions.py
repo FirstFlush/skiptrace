@@ -69,7 +69,10 @@ class CheckSoupError(SpiderError):
 # Pipeline Errors
 # ========================================================
 
-
+class PipelineItemInvalid(PipelineError):
+    """Raised when an item in the pipeline fails it's data
+    validation checks.
+    """
 
 # Soup Errors
 # ========================================================

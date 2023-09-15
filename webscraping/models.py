@@ -1,5 +1,6 @@
 from __future__ import annotations
 import importlib
+import logging
 from typing import Awaitable, List
 
 from tortoise.models import Model
@@ -7,9 +8,13 @@ from tortoise import fields
 
 from common.fields import URLField
 from config import SPIDER_MODULES, PIPELINE_MODULES
+from webscraping.exceptions import SpiderModuleNotFound, PipelineModuleNotFound
 from webscraping.pipeline import Pipeline
 from webscraping.spider import Spider
 from webscraping.exceptions import SpiderModuleNotFound, PipelineModuleNotFound
+
+
+logger = logging.getLogger('scraping')
 
 
 class SpiderAsset(Model):
@@ -23,25 +28,36 @@ class SpiderAsset(Model):
 
     def get_spider(self) -> Spider | None:
         """Retrieve the Spider subclass, based on naming convention."""
-        # module_name = f"webscraping.modules.spiders.{self.spider_name.lower()}"
+        SpiderClass = None
         module_name = f"{SPIDER_MODULES}.{self.spider_name.lower()}"
-        module = importlib.import_module(module_name)
         try:
-            SpiderClass = getattr(module, f"{self.spider_name}Spider")
-        except AttributeError:
-            SpiderClass = None
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            logger.error(repr(SpiderModuleNotFound(self.spider_name)))
+        else:
+            try:
+                SpiderClass = getattr(module, f"{self.spider_name}Spider")
+            except AttributeError:
+                pass
 
         return SpiderClass
 
 
     def get_pipeline(self) -> Pipeline | None:
-        """Retrieve the Pipeline subclass, based on naming convention."""
+        """Retrieve the Pipeline subclass, based on the same 
+        naming convention as self.get_spider()
+        """
+        PipelineClass = None
         module_name = f"webscraping.modules.pipelines.{self.spider_name.lower()}"
-        module = importlib.import_module(module_name)
         try:
-            PipelineClass = getattr(module, f"{self.spider_name}Pipeline")
-        except AttributeError:
-            PipelineClass = None
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            logger.error(repr(PipelineModuleNotFound(self.spider_name)))
+        else:
+            try:
+                PipelineClass = getattr(module, f"{self.spider_name}Pipeline")
+            except AttributeError:
+                pass
 
         return PipelineClass
 

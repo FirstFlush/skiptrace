@@ -3,15 +3,16 @@ import os
 from dotenv import load_dotenv
 from termcolor import colored
 
+
 # Debug Status
 # =================================================
-DEBUG = False
+DEBUG = True
 
 
 # Env Vars & Constants
 # =================================================
-# ENVIRONMENT = "prod"
 ENVIRONMENT = "dev"
+# ENVIRONMENT = "prod"
 if ENVIRONMENT == "prod":
     load_dotenv(".env.prod")
 else:
@@ -38,9 +39,10 @@ LOG_DIR = os.path.join(ROOT_DIR, "log")
 # Models
 # =================================================
 all_models = [
-    'webscraping.models',
-    'skip.models',
     'aerich.models',
+    'auth.models',
+    'skip.models',
+    'webscraping.models',
 ]
 
 
@@ -67,9 +69,13 @@ class ColoredFormatter(logging.Formatter):
 
 
 scraping_logger = logging.getLogger('scraping')
+auth_logger = logging.getLogger('auth')
+
 if DEBUG == True:
+    auth_logger.setLevel(logging.DEBUG)
     scraping_logger.setLevel(logging.DEBUG)
 else:
+    auth_logger.setLevel(logging.INFO)
     scraping_logger.setLevel(logging.INFO)
 
 log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -78,6 +84,13 @@ stream_formatter = ColoredFormatter('%(levelname)-10s%(message)s')
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(stream_formatter)
+
+auth_handler = logging.FileHandler(f"{LOG_DIR}/auth.log")
+auth_handler.setLevel(logging.WARNING)
+auth_handler.setFormatter(log_formatter)
+
+auth_logger.addHandler(auth_handler)
+auth_logger.addHandler(stream_handler)
 
 scraping_handler = logging.FileHandler(f"{LOG_DIR}/scraping.log")
 scraping_handler.setLevel(logging.WARNING)

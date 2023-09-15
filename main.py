@@ -4,6 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from skip.routes import router as router_skip
 from webscraping.routes import router as router_scrape
+from auth.routes import router as router_auth
 
 from config import POSTGRES_DB, all_models, scraping_logger
 
@@ -12,7 +13,7 @@ from config import POSTGRES_DB, all_models, scraping_logger
 app = FastAPI()
 app.include_router(router_skip, prefix="/skip", tags=["skip"])
 app.include_router(router_scrape, prefix="/scrape", tags=["webscraping"])
-
+app.include_router(router_auth, prefix="/auth", tags=["authentication"])
 
 # Initialize Database
 # =================================================

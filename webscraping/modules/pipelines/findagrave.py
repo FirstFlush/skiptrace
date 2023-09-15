@@ -1,7 +1,17 @@
-from webscraping.pipeline import BasePipeline
+from webscraping.pipeline import Pipeline
 from skip.models import SkipRelative
+import logging
 
-class FindAGravePipeline(BasePipeline):
+
+logger = logging.getLogger("scraping")
+
+class FindAGravePipeline(Pipeline):
 
     tables = [SkipRelative]
     
+
+    # def process_item(self, item):
+    #     pass
+
+
+    # def __init__(self):
