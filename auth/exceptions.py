@@ -12,12 +12,18 @@ class HmacException(AuthException):
     """Base class for HMAC exceptons"""
     pass
 
+class PermissionDenied(AuthException):
+    """Raised when user has authenticated succcessfuly,
+    but does not hold required permissions to access resource.
+    """
+    pass
+
 
 # API Key Exceptions
 # ========================================================
-class UserInvalidKeyInvalid(ApiKeyException):
-    """Raised when both user and key headers are present,
-    but invalid
+class UserInvalid(ApiKeyException):
+    """Raised when the submitted UUID can not be found in 
+    the User table
     """
     pass
 

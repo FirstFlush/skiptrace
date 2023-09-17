@@ -20,7 +20,7 @@ logger = logging.getLogger('scraping')
 class SpiderAsset(Model):
 
     spider_name     = fields.CharField(max_length=255)
-    # domain          = fields.URLField(max_length=255)
+    description     = fields.TextField(max_length=2048, null=True)
     is_active       = fields.BooleanField(default=True)
     date_modified   = fields.DatetimeField(auto_now=True)
     date_created    = fields.DatetimeField(auto_now_add=True)

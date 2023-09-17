@@ -1,12 +1,16 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends#, HTTPException
 
-from .authenticators import Authenticators
+from .authentication import AuthRoute
 from .models import User
 
 
 logger = logging.getLogger('auth')
 router = APIRouter()
+
+
+
+
 
 
 @router.get("/")
@@ -24,8 +28,12 @@ async def create_user():
     return {"User count":len(users)}
 
 
+
+
+
+
 @router.post("/test")
-async def test(user:User = Depends(Authenticators.key_auth)):
+async def test(user:User = Depends(AuthRoute.spider_launch)):
 
     print('im in the route')
 

@@ -66,5 +66,10 @@ class FileEncryptor:
         return decrypted_data
 
 
+if __name__ == '__main__':
+    FileEncryptor().encrypt(data={
+        "X-API-KEY" : "O9khu_E4PGZL5YfWLsWCbS5oKxPsZC5AjF-7GVhqPLcmvIzNlHG65-sc65hbpDRINPdqEttosrlyqND-6ahPtg",
+        "X-ACCESS" : "42863bb8-6ccb-485e-947c-f0f68bac012c"
+    })
 
 
