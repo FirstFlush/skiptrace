@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 from tortoise.exceptions import DoesNotExist, OperationalError
 
-from auth.auth_base import AuthModuleBase
+from auth.auth_module_base import AuthModuleBase
 from auth.exceptions import UserInvalid, UserValidKeyInvalid
 from auth.models import User
 

@@ -1,4 +1,4 @@
-from webscraping.pipeline import Pipeline
+from webscraping.pipeline_base import Pipeline
 from skip.models import SkipRelative
 import logging
 

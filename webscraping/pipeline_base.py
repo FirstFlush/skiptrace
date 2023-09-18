@@ -22,11 +22,9 @@ class Pipeline:
         """Iterates through each dict in the data list and """
 
         for item in self.data:
-
-            print(self.data)
-            print('*'*50)
-
-            print('ITEM: ', item)
+            # print(self.data)
+            # print('*'*50)
+            # print('ITEM: ', item)
             processed_item = self.process_item(item)
             if item is not None:
                 self.processed_data.append(processed_item)

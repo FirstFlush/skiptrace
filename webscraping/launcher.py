@@ -1,18 +1,11 @@
 # from __future__ import annotations
 import asyncio
-import importlib
 import logging
 from datetime import datetime
 
-
-# from common.enums import LogLevel
-from config import SENTINEL
-# from .models import SpiderAsset
-# from .spider import SpiderModuleNotFound
-# from webscraping.pipeline import Pipeline
-# from webscraping.spider import Spider
+from config import SENTINEL, ACCEPTABLE_SPIDER_DURATION
 from webscraping.models import SpiderAsset, SpiderError
-from webscraping.exceptions import SpiderModuleNotFound, BrokenSpidersError
+from webscraping.exceptions import BrokenSpidersError
 
 
 logger = logging.getLogger("scraping")
@@ -23,21 +16,12 @@ class SpiderLauncher:
     and feed them into the database pipeline.
     """
 
-    # modules:str = SPIDER_MODULES
-
     def __init__(self, queue:asyncio.Queue, spiders:list[SpiderAsset]):
         self.spiders = spiders
         self.spider_count = len(self.spiders)
         self.broken_spiders:list[tuple] = []
         self.queue = queue
         self.sentinel = SENTINEL
-
-
-    # async def initialize(self):
-    #     """Fetch the active SpiderAssets and await them."""
-    #     self.spiders = await SpiderAsset.get_active()
-    #     self.spider_count = len(self.spiders)
-    #     return
 
 
     def broken_spider(self, spider_id:int, error_name:str):
@@ -65,23 +49,33 @@ class SpiderLauncher:
         await self.queue.put(self.sentinel)
 
 
+    def record_timing(self, start:datetime):
+        """Function displaying how long the spiders took to 
+        finish scraping.
+        """
+        end = datetime.now()
+        logger.info(f"{end.strftime('%H:%M:%S.%f')} Scraping complete")
+        time_elapsed = end - start
+        time_str = f"\033[1m{time_elapsed}\033[0m to complete"
+        if time_elapsed.seconds < ACCEPTABLE_SPIDER_DURATION:
+            logger.info(time_str)
+        else:
+            logger.warning(time_str)
+        return
+
+
     async def launch(self): 
         """Iterates through all the spiders and calls launch_spider()"""
         tasks = []
-        start = datetime.now()
-        logger.info(f"{start.strftime('%H:%M:%S.%f')} Launching {len(self.spiders)} spiders...")
+        start_time = datetime.now()
+        logger.info(f"{start_time.strftime('%H:%M:%S.%f')} Launching {len(self.spiders)} spiders...")
         for spider in self.spiders:
             task = asyncio.create_task(self.launch_spider(spider))
             logger.debug(f"-{spider.spider_name} launched")
             tasks.append(task)
         await asyncio.gather(*tasks)
-        end = datetime.now()
         await self.close_queue()
-        logger.info(f"{end.strftime('%H:%M:%S.%f')} Scraping complete")
-        logger.info(f"\033[1m{(end - start)}\033[0m elapsed")
-
-
-
+        self.record_timing(start_time)
         if len(self.broken_spiders) > 0:
             self.log_errors()
             await self.record_errors()

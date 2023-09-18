@@ -6,11 +6,11 @@ from typing import Awaitable, List
 from tortoise.models import Model
 from tortoise import fields
 
-from common.fields import URLField
+from common.fields import DomainField
 from config import SPIDER_MODULES, PIPELINE_MODULES
 from webscraping.exceptions import SpiderModuleNotFound, PipelineModuleNotFound
-from webscraping.pipeline import Pipeline
-from webscraping.spider import Spider
+from webscraping.pipeline_base import Pipeline
+from webscraping.spider_base import Spider
 from webscraping.exceptions import SpiderModuleNotFound, PipelineModuleNotFound
 
 
@@ -20,7 +20,8 @@ logger = logging.getLogger('scraping')
 class SpiderAsset(Model):
 
     spider_name     = fields.CharField(max_length=255)
-    description     = fields.TextField(max_length=2048, null=True)
+    domain          = DomainField(max_length=255)
+    description     = fields.TextField(max_length=2048)
     is_active       = fields.BooleanField(default=True)
     date_modified   = fields.DatetimeField(auto_now=True)
     date_created    = fields.DatetimeField(auto_now_add=True)

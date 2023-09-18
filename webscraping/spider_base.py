@@ -12,7 +12,8 @@ from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError, 
 
 from common.enums import LogLevel
 from .exceptions import WebScrapingError, CookSoupError, CheckSoupError, SpiderHttpError
-from .soup import SpiderSoup
+from .parser_base import SpiderParser
+
 
 logger = logging.getLogger('scraping')
 
@@ -41,7 +42,7 @@ class Spider:
     def _soup(self, markup:str|bytes, **kwargs):
         """Instantiates BeautifulSoup object and sets it to self.soup"""
         try:
-            self.soup = SpiderSoup(markup=markup, features='lxml', **kwargs)
+            self.soup = SpiderParser(markup=markup, features='lxml', **kwargs)
         except (FeatureNotFound, ValueError, ParserRejectedMarkup) as e:
             raise e
         return
@@ -180,21 +181,21 @@ class PlaywrightSpider(Spider):
         self.page = None
 
 
-    def sync(self, browser:str='chromium', headless:bool=False):
-        """Sync Chromium webdriver and open the browser."""
-        self.p = async_playwright().start()
+    async def start(self, browser:str='chromium', headless:bool=True):
+        """Launch async webdriver and get a blank page."""
+        self.p = await async_playwright().start()
         match browser:
             case 'firefox':
-                self.browser = self.p.firefox.launch(headless=headless)
+                self.browser = await self.p.firefox.launch(headless=headless)
             case 'webkit':  # requires more libraries
-                self.browser = self.p.webkit.launch(headless=headless)
+                self.browser = await self.p.webkit.launch(headless=headless)
             case _:
-                self.browser = self.p.chromium.launch(headless=headless)
-        self.page = self.browser.new_page()
+                self.browser = await self.p.chromium.launch(headless=headless)
+        self.page = await self.browser.new_page()
         return
 
 
-    def goto(self, url, timeout:float=5000, **kwargs) -> ResponsePlaywright|None:
+    async def goto(self, url, timeout:float=5000, **kwargs) -> ResponsePlaywright | None:
         """Wrapper function for playwright's page.goto() method to
         includes error handling and logging.
 
@@ -203,15 +204,15 @@ class PlaywrightSpider(Spider):
         """
         res = None
         try:
-            res = self.page.goto(url, timeout=timeout, **kwargs)
+            res = await self.page.goto(url, timeout=timeout, **kwargs)
         except (PlaywrightError, PlaywrightTimeoutError) as e:
             self.log(SpiderHttpError(repr(e)), LogLevel.ERROR)
         return res
 
 
-    def shutdown(self):
+    async def close_session(self):
         """Shuts down the web browser"""
-        self.p.stop()
+        await self.p.stop()
         return
 
 

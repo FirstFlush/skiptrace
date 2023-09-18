@@ -41,12 +41,16 @@ class PipelineModuleNotFound(SpiderAssetError):
 
 # SpiderLauncher Exceptions
 # ========================================================
-
 class BrokenSpidersError(SpiderLaunchError):
     """Raised when 1 or more spiders raises an error and fails to scrape."""
     pass
 
-
+# class SlowSpidersWarning(SpiderLaunchError):
+#     """Raised when the spiders take too long to finish their job.
+#     Acceptable time to complete is defined in config.py as 
+#     ACCEPTABLE_SPIDER_DURATION
+#     """
+#     pass
 
 # Spider Exceptions
 # ========================================================

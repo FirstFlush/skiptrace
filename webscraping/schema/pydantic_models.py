@@ -4,6 +4,7 @@ from typing import Optional
 
 class SpiderSchema(BaseModel):
     spider_name: str = Field(..., max_length=255)
+    domain: str = Field(..., max_length=255)
     is_active: Optional[bool]
     description: Optional[str] = Field(..., max_length=2048)
 

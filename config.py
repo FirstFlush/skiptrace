@@ -19,6 +19,7 @@ else:
     load_dotenv(".env.dev")
 HTTP_TIMEOUT = 5
 SPIDER_MAX_ERRORS = 5
+ACCEPTABLE_SPIDER_DURATION = 10.0 #seconds
 SPIDER_MODULES = "webscraping.modules.spiders"
 PIPELINE_MODULES = "webscraping.modules.pipelines"
 SENTINEL = None  # value passed into async Queue to stop PipelineListener from listening.

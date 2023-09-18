@@ -4,18 +4,24 @@ class AuthException(BaseException):
     """Base class for authenitcation exceptions"""
     pass
 
-class ApiKeyException(AuthException):
-    """Base class for API key exceptions"""
-    pass
-
-class HmacException(AuthException):
-    """Base class for HMAC exceptons"""
+class AuthModuleNotFound(AuthException):
+    """Raised when an auth module's authenticate() method has not 
+    properly subclassed the AuthModuleBase's authenticate() method.
+    """
     pass
 
 class PermissionDenied(AuthException):
     """Raised when user has authenticated succcessfuly,
     but does not hold required permissions to access resource.
     """
+    pass
+
+class ApiKeyException(AuthException):
+    """Base class for API key exceptions"""
+    pass
+
+class HmacException(AuthException):
+    """Base class for HMAC exceptons"""
     pass
 
 

@@ -6,7 +6,7 @@ from tortoise.transactions import atomic
 from config import SENTINEL
 # from webscraping.exceptions import PipelineModuleNotFound
 from webscraping.models import SpiderAsset
-from webscraping.pipeline import Pipeline
+from webscraping.pipeline_base import Pipeline
 # from webscraping.spider import Spider
 
 
@@ -56,7 +56,7 @@ class PipelineListener:
         while True:
             data = await self.queue.get()
             if data == self.sentinel:
-                logger.info("Sentinel value received")
+                logger.info("Pipeline sentinel value received")
                 break
             spider_asset = self.spider_registry[data['id']]
             pipeline = self.get_pipeline_object(spider_asset, data)

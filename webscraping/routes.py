@@ -28,7 +28,7 @@ async def launch_spiders(user:User = Depends((AuthRoute.spider_launch))):
 
     logger.debug('Initialized Spider Launcher')
     logger.debug('Initialized Pipeline Listener')
-    
+
     await asyncio.gather(sl.launch(), pl.listen())
 
     return {"asdffdsa": "fdafdsaf scrapppe"}
@@ -38,7 +38,7 @@ async def launch_spiders(user:User = Depends((AuthRoute.spider_launch))):
 @router.get("/listSpiders")
 async def all_spiders():
     spiders = await SpiderAsset.all()
-    return [SpiderSchema(spider_name=spider.spider_name, is_active=spider.is_active, description=spider.description) for spider in spiders]
+    return [SpiderSchema(spider_name=spider.spider_name, is_active=spider.is_active, domain=spider.domain, description=spider.description) for spider in spiders]
 
 
 @router.get("/get_spiders")

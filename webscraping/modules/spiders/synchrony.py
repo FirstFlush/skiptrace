@@ -1,5 +1,5 @@
 # from ..spider import RequestsSpider
-from webscraping.spider import AsyncSpider
+from webscraping.spider_base import AsyncSpider
 from asyncio import sleep as async_sleep
 
 
